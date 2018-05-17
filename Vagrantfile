@@ -1,10 +1,10 @@
-BOX_NAME = "bento/ubuntu-17.10"
+BOX_NAME = "centos/7"
 
 Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |vb|
     vb.cpus   = "2"
-    vb.memory = "4096"
+    vb.memory = "2048"
   end
 
   # kube node 'A'
@@ -31,6 +31,8 @@ end
 # On node A:
 # sudo kubeadm init --apiserver-advertise-address 192.168.99.200 --pod-network-cidr=192.168.99.0/16
 # note: copy down discovery token / kubeadm join command for later
+# if you lose it, run:
+# sudo kubeadm token create --print-join-command
 # mkdir -p $HOME/.kube
 # sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 # sudo chown $(id -u):$(id -g) $HOME/.kube/config
@@ -56,3 +58,7 @@ end
 # NAME      STATUS    ROLES     AGE       VERSION
 # node-a    Ready     master    3m        v1.9.7
 # node-b    Ready     <none>    45s       v1.9.7
+
+
+# restart commands:
+# systemctl daemon-reload && systemctl restart kubelet docker

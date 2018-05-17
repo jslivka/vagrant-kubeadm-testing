@@ -1,21 +1,30 @@
 #!/bin/sh
 set -ex
 
-apt-get update && apt-get install -y apt-transport-https
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
-apt-get update && apt-get install -y \
-    docker.io=1.13.1-0ubuntu6 \
-    kubelet=1.9.7-00 \
-    kubectl=1.9.7-00 \
-    kubeadm=1.9.7-00
+yum update && yum install -y curl
+yum install -y docker
 
+systemctl enable docker && systemctl start docker
+
+cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+setenforce 0
+yum install -y kubelet kubeadm kubectl kubeadm
+
+systemctl enable kubelet && systemctl start kubelet
 swapoff -a
-systemctl enable docker.service
+echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
 
 export KUBECONFIG=/etc/kubernetes/admin.conf
 echo "export KUBECONFIG=/etc/kubernetes/admin.conf" >> /etc/bash.bashrc
 # sudo -i
 # /vagrant/bin/594_kubeadm init
 # kubectl apply -f https://git.io/weave-kube-1.6
-# kubectl taint nodes --all node-role.kubernetes.io/master-
+# kubectl taint nodes --all node-role.kubernetes.io/master- 
